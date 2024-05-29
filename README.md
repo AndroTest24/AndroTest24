@@ -35,7 +35,7 @@ evaluation_framework
 
 #### Environment
 
-- Python: Tested on Python 3.7
+- Python: Tested on Python 3.7, recomended to build the python environment under `/evaluation_framework/` to avoid import problem.
 - Requirements: `pip install -r ./requirements.txt`
 
 #### Run

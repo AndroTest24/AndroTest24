@@ -8,8 +8,8 @@ from typing import Dict, List, Callable, Optional
 import numpy as np
 import pandas as pd
 
-from evalution.result_analyzer.utils.data_util import DataType, StatisticDataUtil
-from evalution.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
+from evaluation.result_analyzer.utils.data_util import DataType, StatisticDataUtil
+from evaluation.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
 
 
 class Variation:

@@ -11,13 +11,13 @@ import numpy as np
 import pandas as pd
 
 from constant import PlatformConstant
-from evalution.result_analyzer.study_analyzer.study_util import Experiments
-from evalution.result_analyzer.utils.coverage_util import CoverageTimeUtil, CoverageDataUtil
-from evalution.result_analyzer.utils.data_util import DataType
-from evalution.result_analyzer.utils.fault_util import AbstractItem, FaultDomain, LogcatUtil
-from evalution.result_analyzer.utils.fault_top_level_util import BugAnalyzer
-from evalution.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
-from evalution.result_analyzer.utils.pattern_util import PatternUtil
+from evaluation.result_analyzer.study_analyzer.study_util import Experiments
+from evaluation.result_analyzer.utils.coverage_util import CoverageTimeUtil, CoverageDataUtil
+from evaluation.result_analyzer.utils.data_util import DataType
+from evaluation.result_analyzer.utils.fault_util import AbstractItem, FaultDomain, LogcatUtil
+from evaluation.result_analyzer.utils.fault_top_level_util import BugAnalyzer
+from evaluation.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
+from evaluation.result_analyzer.utils.pattern_util import PatternUtil
 from runtime_collection.collector_util.util_coverage import CoverageItem
 from runtime_collection.unified_testing_config import Apps, get_app_by_package_name, get_app_name_by_package_name, \
     SORTED_APP_NAME_LIST_BY_INSTRUCTION, empirical_app_list_all_for_combodroid

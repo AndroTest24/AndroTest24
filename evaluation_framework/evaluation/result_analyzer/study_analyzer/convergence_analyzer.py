@@ -2,9 +2,9 @@
 # @Time  : 2024 May
 # @Author: Anonymity
 # ----------------------
-from evalution.result_analyzer.analysis import convergence_analysis
-from evalution.result_analyzer.study_analyzer.study_util import Experiments
-from evalution.result_analyzer.utils.data_util import DataType
+from evaluation.result_analyzer.analysis import convergence_analysis
+from evaluation.result_analyzer.study_analyzer.study_util import Experiments
+from evaluation.result_analyzer.utils.data_util import DataType
 from runtime_collection.unified_testing_config import empirical_app_list_all
 
 

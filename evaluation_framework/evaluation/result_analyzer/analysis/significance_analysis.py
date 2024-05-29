@@ -13,8 +13,8 @@ import pandas as pd
 from pandas import CategoricalDtype
 
 from android_testing_utils.log import my_logger
-from evalution.result_analyzer.utils.data_util import DataType, StatisticDataUtil
-from evalution.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
+from evaluation.result_analyzer.utils.data_util import DataType, StatisticDataUtil
+from evaluation.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
 from runtime_collection import unified_testing_config
 
 

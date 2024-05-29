@@ -11,13 +11,13 @@ import pandas as pd
 
 from android_testing_utils.log import my_logger
 from constant import PlatformConstant
-from evalution.result_analyzer.utils.fault_util import LogcatUtil, FaultResUtil, AbstractItem
-from evalution.result_analyzer.utils.fault_top_level_util import BugAnalyzer
-from evalution.result_analyzer.study_analyzer.study_util import Experiments
-from evalution.result_analyzer.utils.coverage_util import CoverageTimeUtil
-from evalution.result_analyzer.utils.data_util import DataType
-from evalution.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator, PathUtil
-from evalution.result_analyzer.utils.pattern_util import PatternUtil
+from evaluation.result_analyzer.utils.fault_util import LogcatUtil, FaultResUtil, AbstractItem
+from evaluation.result_analyzer.utils.fault_top_level_util import BugAnalyzer
+from evaluation.result_analyzer.study_analyzer.study_util import Experiments
+from evaluation.result_analyzer.utils.coverage_util import CoverageTimeUtil
+from evaluation.result_analyzer.utils.data_util import DataType
+from evaluation.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator, PathUtil
+from evaluation.result_analyzer.utils.pattern_util import PatternUtil
 from runtime_collection import unified_testing_config
 from runtime_collection.collector_util.util_coverage import CoverageItem
 

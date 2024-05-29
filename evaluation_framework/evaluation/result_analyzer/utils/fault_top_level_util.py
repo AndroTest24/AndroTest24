@@ -8,8 +8,8 @@ from typing import Optional, List, Tuple, Dict
 
 from android_testing_utils.log import my_logger
 from constant import PlatformConstant
-from evalution.result_analyzer.utils.fault_util import AbstractItem, BugUtil
-from evalution.result_analyzer.utils.pattern_util import PatternUtil
+from evaluation.result_analyzer.utils.fault_util import AbstractItem, BugUtil
+from evaluation.result_analyzer.utils.pattern_util import PatternUtil
 
 
 class BugAnalyzer:

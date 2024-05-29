@@ -6,11 +6,11 @@ import os
 from typing import Optional, List
 
 from android_testing_utils.log import my_logger
-from evalution.result_analyzer.analysis.correlation_analysis import Correlation
-from evalution.result_analyzer.analysis.significance_analysis import Significance
-from evalution.result_analyzer.analysis.variation_analysis import Variation
-from evalution.result_analyzer.utils.data_util import DataType
-from evalution.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
+from evaluation.result_analyzer.analysis.correlation_analysis import Correlation
+from evaluation.result_analyzer.analysis.significance_analysis import Significance
+from evaluation.result_analyzer.analysis.variation_analysis import Variation
+from evaluation.result_analyzer.utils.data_util import DataType
+from evaluation.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
 from runtime_collection import unified_testing_config
 
 

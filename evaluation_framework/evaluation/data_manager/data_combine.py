@@ -11,8 +11,8 @@ import numpy as np
 
 from android_testing_utils.log import my_logger
 from constant import PlatformConstant
-from evalution.result_analyzer.utils.coverage_util import CoverageTimeUtil, CoverageDataUtil
-from evalution.result_analyzer.utils.pattern_util import PatternUtil
+from evaluation.result_analyzer.utils.coverage_util import CoverageTimeUtil, CoverageDataUtil
+from evaluation.result_analyzer.utils.pattern_util import PatternUtil
 from runtime_collection import unified_testing_config
 from runtime_collection.collector_util.util_coverage import CoverageItem, CoverageDetail, CoverageDetailWithStd, \
     get_readable_final_coverage_info_string
@@ -279,7 +279,7 @@ class CoverageCombine:
 
 
 if __name__ == '__main__':
-    from evalution.result_analyzer.study_analyzer.study_util import Experiments
+    from evaluation.result_analyzer.study_analyzer.study_util import Experiments
     for current_pattern, current_target_apps in Experiments.EXPERIMENTAL_APP_DICT.items():
         CoverageCombine.combine_packages_with_pattern(
             pattern=current_pattern,

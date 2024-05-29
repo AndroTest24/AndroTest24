@@ -10,7 +10,7 @@ import pandas as pd
 
 from android_testing_utils.log import my_logger
 from constant import PlatformConstant
-from evalution.result_analyzer.utils.path_util import PathUtil
+from evaluation.result_analyzer.utils.path_util import PathUtil
 
 
 class AbstractItem(NamedTuple):

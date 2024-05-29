@@ -13,7 +13,7 @@ from android_testing_utils.log import my_logger
 from constant.platform_constant import PlatformConstant
 from runtime_collection.collector_util.util_coverage import ApkSourceCodeArgs, CoverageItem
 from runtime_collection import unified_testing_config
-from evalution.result_analyzer.utils.pattern_util import PatternUtil
+from evaluation.result_analyzer.utils.pattern_util import PatternUtil
 
 
 class TestResultType(Enum):

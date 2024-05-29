@@ -9,9 +9,9 @@ import numpy as np
 import pandas as pd
 
 from android_testing_utils.log import my_logger
-from evalution.result_analyzer.analysis.significance_analysis import Significance
-from evalution.result_analyzer.utils.data_util import DataType
-from evalution.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
+from evaluation.result_analyzer.analysis.significance_analysis import Significance
+from evaluation.result_analyzer.utils.data_util import DataType
+from evaluation.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
 
 
 class Correlation:

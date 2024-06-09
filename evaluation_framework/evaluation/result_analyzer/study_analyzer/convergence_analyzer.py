@@ -9,11 +9,11 @@ from runtime_collection.unified_testing_config import empirical_app_list_all
 
 
 if __name__ == '__main__':
-    convergence_analysis.present_and_export_coverage_convergence_result(
-        target_app_dict=Experiments.EXPERIMENTAL_APP_DICT,
-        testing_time=10800,
-        postfix="@10",
-    )
+    # convergence_analysis.present_and_export_coverage_convergence_result(
+    #     target_app_dict=Experiments.EXPERIMENTAL_APP_DICT,
+    #     testing_time=10800,
+    #     postfix="@10",
+    # )
 
     # convergence_analysis.FaultConvergenceTime.generate_raw_pickle_data(
     #     pattern_dict=Experiments.TAG_PATTERN_DICT,

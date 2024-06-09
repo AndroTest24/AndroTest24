@@ -41,8 +41,8 @@ evaluation_framework
 #### Run
 Some raw exported data has been provided under `/evaluation_framework/evaluation/result_analyzer/excel/`.<br />Uncommented code in the main fields of our study analyzers under `/evaluation_framework/evaluation/result_analyzer/study_analyzer/` could be run directly.<br />Since there are some dependencies between data, it's recommended to run them in the following order:
 
-1. granularities_analyzer
-2. metrics_relation_analyzer
+1. granularities_analyzer.py
+2. metrics_relation_analyzer.py
 3. randomness_analyzer.py
 4. convergence_analyzer.py
 

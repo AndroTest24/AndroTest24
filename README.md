@@ -27,21 +27,22 @@ evaluation_framework
 │   └── result_analyzer  Main analyzation
 │       ├── analysis  Statistical analysis methods
 │       ├── excel  Data
-│       ├── study_analyzer  Analyzers that are customized for our study.
-│       └── utils  Some utils.
-└── runtime_collection  Some dependent test configs.
+│       ├── study_analyzer  Analyzers that are customized for our study
+│       └── utils  Some utils
+└── runtime_collection  Some dependent test configs
 
 ```
 
 #### Environment
 
-- Python: Tested on **Python 3.7**, recomended to build the python environment under `/evaluation_framework/` to avoid import problem.
+- Python: Tested on **Python 3.7**, recommended to build the Python project and environment under `/evaluation_framework/` to avoid import problems.
 - Requirements: `pip install -r ./requirements.txt`
 
 #### Run
-Some raw exported data has been provided under `/evaluation_framework/evaluation/result_analyzer/excel/`.<br />Uncommented code under the main fields of our study analyzers under `/evaluation_framework/evaluation/result_analyzer/study_analyzer/` could be run directly.<br />Since there are some dependencies between data, it's recommended to run them in the following order:
+Some raw exported data has been provided under `/evaluation_framework/evaluation/result_analyzer/excel/`.<br />Uncommented code in the main fields of our study analyzers under `/evaluation_framework/evaluation/result_analyzer/study_analyzer/` could be run directly.<br />Since there are some dependencies between data, it's recommended to run them in the following order:
 
 1. granularities_analyzer
 2. metrics_relation_analyzer
 3. randomness_analyzer.py
 4. convergence_analyzer.py
+

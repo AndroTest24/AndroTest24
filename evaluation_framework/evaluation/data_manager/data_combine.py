@@ -2,20 +2,29 @@
 # @Time  : 2024 May
 # @Author: Anonymity
 # ----------------------
+import itertools
 import os
 import shutil
 import time
+import numpy as np
+import pandas as pd
 from typing import List, Dict, Optional, Tuple
 
-import numpy as np
+from pandas.api.types import CategoricalDtype
 
 from android_testing_utils.log import my_logger
 from constant import PlatformConstant
+from evaluation.result_analyzer.study_analyzer.convergence_analysis import PERCENTAGE_TARGETS
 from evaluation.result_analyzer.utils.coverage_util import CoverageTimeUtil, CoverageDataUtil
+from evaluation.result_analyzer.utils.data_util import DataType
 from evaluation.result_analyzer.utils.pattern_util import PatternUtil
+from evaluation.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
 from runtime_collection import unified_testing_config
 from runtime_collection.collector_util.util_coverage import CoverageItem, CoverageDetail, CoverageDetailWithStd, \
     get_readable_final_coverage_info_string
+from runtime_collection.unified_testing_config import SORTED_TOOL_NAME_LIST, \
+    SORTED_APP_NAME_LIST_BY_INSTRUCTION
+from evaluation.result_analyzer.analysis.significance_analysis import Significance
 
 
 class CoverageCombine:
@@ -278,13 +287,237 @@ class CoverageCombine:
         )
 
 
-if __name__ == '__main__':
-    from evaluation.result_analyzer.study_analyzer.study_util import Experiments
-    for current_pattern, current_target_apps in Experiments.EXPERIMENTAL_APP_DICT.items():
-        CoverageCombine.combine_packages_with_pattern(
-            pattern=current_pattern,
-            need_std=True,
-            target_apps=current_target_apps,
-        )
+def from_full_data_to_average_data(file_to_read: str, file_to_write: str, data_type: DataType):
+    file_path_to_read = os.path.join(ExcelDirectoryPathGenerator.get_original_data_dir(data_type), file_to_read)
+    file_path_to_write = os.path.join(ExcelDirectoryPathGenerator.get_original_data_dir(data_type), file_to_write)
+
+    df = pd.read_excel(file_path_to_read, index_col=0)  # Assuming the first column is the index
+
+    df_grouped = df.groupby(df.index).mean()
+
+    if data_type == DataType.Coverage:
+        df_grouped = df_grouped.round(2)
+
+    res = {}
+    for column in df_grouped.columns:
+        app_name, sub_metric = column.split('-')
+        if sub_metric not in res:
+            res[sub_metric] = pd.DataFrame(index=df_grouped.index)
+        res[sub_metric][app_name] = df_grouped[column]
+
+    excel_writer = pd.ExcelWriter(file_path_to_write)
+    for sub_metric, df_sub in res.items():
+        df_sub = df_sub.transpose()
+
+        my_index_order = CategoricalDtype(SORTED_APP_NAME_LIST_BY_INSTRUCTION, ordered=True)
+        df_sub.index = df_sub.index.astype(my_index_order)
+        df_sub.sort_index(axis=0, inplace=True)
+
+        my_columns_order = CategoricalDtype(SORTED_TOOL_NAME_LIST, ordered=True)
+        df_sub.columns = df_sub.columns.astype(my_columns_order)
+        df_sub.sort_index(axis=1, inplace=True)
+
+        df_sub.to_excel(excel_writer, sheet_name=sub_metric)
+
+    excel_writer.save()
+
+
+def from_average_data_to_average_cmp_data(file_to_read: str, file_to_write: str, data_type: DataType):
+    file_path_to_read = os.path.join(ExcelDirectoryPathGenerator.get_original_data_dir(data_type), file_to_read)
+    file_path_to_write = os.path.join(ExcelDirectoryPathGenerator.get_original_data_dir(data_type), file_to_write)
+
+    dfs = pd.read_excel(file_path_to_read, index_col=0, sheet_name=None)
+
+    tool_pairs = ['-'.join(item) for item in itertools.combinations(SORTED_TOOL_NAME_LIST, 2)]
+    res = {}
+    for sheet_name, sheet_data in dfs.items():
+        res[sheet_name] = pd.DataFrame(index=SORTED_APP_NAME_LIST_BY_INSTRUCTION, columns=tool_pairs, dtype=int)
+        for app in SORTED_APP_NAME_LIST_BY_INSTRUCTION:
+            n = len(SORTED_TOOL_NAME_LIST)
+            for i in range(n):
+                for j in range(i + 1, n):
+                    tool1 = SORTED_TOOL_NAME_LIST[i]
+                    tool2 = SORTED_TOOL_NAME_LIST[j]
+                    if sheet_data.loc[app, tool1] == -1 or sheet_data.loc[app, tool2] == -1:
+                        res[sheet_name].loc[app, f"{tool1}-{tool2}"] = np.nan
+                    elif sheet_data.loc[app, tool1] > sheet_data.loc[app, tool2]:
+                        res[sheet_name].loc[app, f"{tool1}-{tool2}"] = 1
+                    elif sheet_data.loc[app, tool1] < sheet_data.loc[app, tool2]:
+                        res[sheet_name].loc[app, f"{tool1}-{tool2}"] = -1
+                    else:
+                        res[sheet_name].loc[app, f"{tool1}-{tool2}"] = 0
+
+    app_pairs = [f"{app}_{pair}" for app in SORTED_APP_NAME_LIST_BY_INSTRUCTION for pair in tool_pairs]
+    df_all = pd.DataFrame(index=app_pairs, columns=dfs.keys(), dtype=int)
+    for sub_metric, df_sub in res.items():
+        for app in SORTED_APP_NAME_LIST_BY_INSTRUCTION:
+            for pair in tool_pairs:
+                if not np.isnan(df_sub.loc[app, pair]):
+                    df_all.loc[f"{app}_{pair}", sub_metric] = df_sub.loc[app, pair]
+    df_all.dropna(inplace=True)
+    df_all_corr = df_all.corr()
+    res["all_data"] = df_all
+    res["all_data_corr"] = df_all_corr
+
+    temp = df_all.iloc[:, :-1]
+    all_equal = temp.apply(lambda row: (row == row.iloc[0]).all(), axis=1)
+    print(all_equal.sum(), len(all_equal), all_equal.sum() / len(all_equal))
+    df_all["equal_3"] = all_equal
+
+    excel_writer = pd.ExcelWriter(file_path_to_write)
+    for sub_metric, df_sub in res.items():
+        df_sub.to_excel(excel_writer, sheet_name=sub_metric)
+
+    excel_writer.save()
+
+
+def from_significance_data_to_tool_significance_level(file_to_read: str, file_to_write: str, data_type: DataType):
+    file_path_to_read = os.path.join(ExcelDirectoryPathGenerator.get_processed_statistic_data_dir(data_type), file_to_read)
+    file_path_to_write = os.path.join(ExcelDirectoryPathGenerator.get_processed_statistic_data_dir(data_type), file_to_write)
+
+    dfs = pd.read_excel(file_path_to_read, index_col=0, sheet_name=None)  # Assuming the first column is the index
+    res = {}
+
+    for sheet_name, sheet_data in dfs.items():
+        if not sheet_name.endswith(Significance.IS_SIGNIFICANT_IDENTIFIER):
+            continue
+        tool1, tool2 = sheet_name.split('_')[0].split('-')
+        target_columns = sheet_data.columns[:4]
+        target_indexes = sheet_data.index[:42]
+        for column in target_columns:
+            if column not in res:
+                res[column] = pd.DataFrame(index=SORTED_APP_NAME_LIST_BY_INSTRUCTION, columns=SORTED_TOOL_NAME_LIST, dtype=int)
+                res[column].fillna(0, inplace=True)
+            for index in target_indexes:
+                if sheet_data.loc[index, column] == '++':
+                    res[column].loc[index, tool1] += 1
+                    res[column].loc[index, tool2] -= 1
+                elif sheet_data.loc[index, column] == '--':
+                    res[column].loc[index, tool2] += 1
+                    res[column].loc[index, tool1] -= 1
+
+    excel_writer = pd.ExcelWriter(file_path_to_write)
+    for sub_metric, df_sub in res.items():
+        df_sub.to_excel(excel_writer, sheet_name=sub_metric)
+
+    excel_writer.save()
+
+
+def combine_cv_data_to_one(file_to_write, tasks):
+    res = {}
+
+    def add_data(file_name, submetric_targets):
+        cv_data_path = os.path.join(ExcelDirectoryPathGenerator.get_cv_data_dir(), file_name)
+        dfs = pd.read_excel(cv_data_path, index_col=0, sheet_name=None)
+        for sheet_name, sheet_data in dfs.items():
+            tool = sheet_name.split('|')[1]
+            if 'cv' not in sheet_name or tool not in SORTED_TOOL_NAME_LIST:
+                continue
+            for column in sheet_data.columns:
+                if column not in submetric_targets:
+                    continue
+                if column not in res:
+                    res[column] = pd.DataFrame(index=list(range(3, 11)), columns=SORTED_TOOL_NAME_LIST)
+                res[column][tool] = sheet_data[column]
+
+    for file_name, targets in tasks.items():
+        add_data(file_name, targets)
+
+    excel_writer = pd.ExcelWriter(os.path.join(ExcelDirectoryPathGenerator.get_cv_data_dir(), file_to_write))
+    for sub_metric, df_sub in res.items():
+        df_sub.to_excel(excel_writer, sheet_name=sub_metric)
+
+    excel_writer.save()
+
+
+tool_mapping = {item.lower(): item for item in SORTED_TOOL_NAME_LIST}
+def combine_convergence_data_to_one(file_to_write, tasks, get_average=False):
+    res = {}
+
+    def add_data(file_name, data_type, submetric_mapping):
+        convergence_data_path = os.path.join(ExcelDirectoryPathGenerator.get_time_data_dir(data_type), file_name)
+        dfs = pd.read_excel(convergence_data_path, index_col=0, sheet_name=None)
+        for sheet_name, sheet_data in dfs.items():
+            raw_tool = sheet_name.split('~')[0].split('-')[-1]
+            tool = tool_mapping[raw_tool]
+            for column in sheet_data.columns:
+                if not column.endswith('%'):
+                    continue
+                submetric_identifier, percentage = column.split('-')
+                submetric = submetric_mapping[submetric_identifier]
+                if submetric not in res:
+                    res[submetric] = pd.DataFrame(index=PERCENTAGE_TARGETS, columns=SORTED_TOOL_NAME_LIST)
+                res[submetric].loc[int(percentage[:-1]), tool] = sheet_data.loc["avg-all", column]
+
+    for file_name, targets in tasks.items():
+        add_data(file_name, *targets)
+
+    # Path to save the temporary Excel file
+    temp_file_path = os.path.join(ExcelDirectoryPathGenerator.get_time_data_dir(None), file_to_write)
+    excel_writer = pd.ExcelWriter(temp_file_path, engine='openpyxl')
+    for sub_metric, df_sub in res.items():
+        if get_average:
+            df_sub["avg-all"] = np.round(df_sub.mean(axis=1), 2)
+        df_sub.to_excel(excel_writer, sheet_name=sub_metric)
+
+    excel_writer.save()
+
+
+# if __name__ == '__main__':
+    # from evaluation.result_analyzer.study_analyzer.study_util import Experiments
+    # for current_pattern, current_target_apps in Experiments.EXPERIMENTAL_APP_DICT.items():
+    #     CoverageCombine.combine_packages_with_pattern(
+    #         pattern=current_pattern,
+    #         need_std=True,
+    #         target_apps=current_target_apps,
+    #     )
 
     # CoverageCombine.combine_to_one_with_prefix("DQT-1125-uni", "DQT0807")
+
+    # from_full_data_to_average_data(
+    #     "coverage_full_data_3.0h.xlsx",
+    #     "coverage_average_data_3.0h.xlsx",
+    #     DataType.Coverage,
+    # )
+    # from_average_data_to_average_cmp_data(
+    #     "coverage_average_data_3.0h.xlsx",
+    #     "coverage_average_cmp_data_3.0h.xlsx",
+    #     DataType.Coverage,
+    # )
+    # from_full_data_to_average_data(
+    #     "bug_full_data_3.0h.xlsx",
+    #     "bug_average_data_3.0h.xlsx",
+    #     DataType.Bug,
+    # )
+
+    # from_significance_data_to_tool_significance_level(
+    #     "coverage_ALL_TOOL_PAIRS_3.0h.xlsx",
+    #     "coverage_tool_significance_level_3.0h.xlsx",
+    #     DataType.Coverage,
+    # )
+    # from_significance_data_to_tool_significance_level(
+    #     "bug_ALL_TOOL_PAIRS_3.0h.xlsx",
+    #     "bug_tool_significance_level_3.0h.xlsx",
+    #     DataType.Bug,
+    # )
+    # combine_cv_data_to_one(
+    #     "all_cv_data.xlsx",
+    #     {
+    #         "coverage_3.0h-all.xlsx": ["INSTRUCTION", "LINE", "METHOD", "ACTIVITY"],
+    #         "bug_3.0h-all.xlsx": ["F", "V", "E+", "E", "UF", "UV", "UE+", "UE"],
+    #     }
+    # )
+    # combine_cv_data_to_one(
+    #     "derived_cv_data.xlsx",
+    #     {
+    #         "bug_3.0h-all.xlsx": ["UF", "UV", "UE+", "UE", "T3F", "T3V", "T3E+", "T3E", "T5F", "T5V", "T5E+", "T5E"],
+    #     }
+    # )
+    # combine_convergence_data_to_one(
+    #     "all_convergence_data.xlsx",
+    #     {
+    #         "coverage_time_convergence_data.xlsx": [DataType.Coverage, {"I": "INST", "L": "LINE", "M": "METH", "A": "ACTV"}],
+    #         "fault_time_convergence_data.xlsx": [DataType.Bug, {"F": "Level F", "V": "Level V", "E+": "Level E+", "E": "Level E"}],
+    #     },
+    #     get_average=True,
+    # )

@@ -11,8 +11,7 @@ import pandas as pd
 
 from android_testing_utils.log import my_logger
 from constant import PlatformConstant
-from evaluation.result_analyzer.utils.fault_util import LogcatUtil, FaultResUtil, AbstractItem
-from evaluation.result_analyzer.utils.fault_top_level_util import BugAnalyzer
+from evaluation.result_analyzer.utils.fault_util import LogcatUtil, FaultDomain, AbstractItem, BugAnalyzer, FaultResUtil
 from evaluation.result_analyzer.study_analyzer.study_util import Experiments
 from evaluation.result_analyzer.utils.coverage_util import CoverageTimeUtil
 from evaluation.result_analyzer.utils.data_util import DataType
@@ -102,7 +101,6 @@ class Export:
             current_data.to_excel(excel_writer, sheet_name=app_name)
 
         excel_writer.save()
-        excel_writer.close()
 
         all_data = all_data.fillna(-1)
         all_data.sort_index(
@@ -167,6 +165,11 @@ class BugExperiment:
                 show_final=False,
                 target_time=target_time,
             )
+
+            tag_name_list = list(set([PathUtil.get_tag_name_from_logcat_file_path(file_key) for file_key in abstract_dict.keys()]))
+            app_name_list = list(set([PathUtil.get_app_name_from_logcat_file_path(file_key) for file_key in abstract_dict.keys()]))
+            all_data = pd.concat([all_data, pd.DataFrame(index=tag_name_list, columns=[f"{app_name}-{bug_domain.value}" for app_name in app_name_list for bug_domain in FaultDomain])])
+
             for file_key, abstract_data in abstract_dict.items():
                 tag_name = PathUtil.get_tag_name_from_logcat_file_path(file_key)
                 app_name = PathUtil.get_app_name_from_logcat_file_path(file_key)
@@ -198,31 +201,31 @@ class BugExperiment:
                             all_data.loc[tag_name, f"{app_name}-{prefix}{bug_domain.value}"] = count
             return new_app_data
 
-        # for app_name, app_data in all_abstract_data.items():
-        #     unique_app_data = add_extra_data(
-        #         app_data,
-        #         lambda x: x.split('-')[-1],
-        #         FaultResUtil.get_unique_bugs,
-        #         "U",
-        #     )
-        #     combined_app_data3 = add_extra_data(
-        #         app_data,
-        #         lambda x: x.split('-')[-2],
-        #         partial(FaultResUtil.get_combine_faults, k=3),
-        #         "T3",
-        #     )
-        #     combined_app_data5 = add_extra_data(
-        #         app_data,
-        #         lambda x: x.split('-')[-2],
-        #         partial(FaultResUtil.get_combine_faults, k=5),
-        #         "T5",
-        #     )
-        #     # add_extra_data(
-        #     #     combined_app_data,
-        #     #     lambda x: x.split('-')[-1],
-        #     #     FaultResUtil.get_unique_bugs,
-        #     #     "AU",
-        #     # )
+        for app_name, app_data in all_abstract_data.items():
+            unique_app_data = add_extra_data(
+                app_data,
+                lambda x: x.split('-')[-1],
+                FaultResUtil.get_unique_bugs,
+                "U",
+            )
+            combined_app_data3 = add_extra_data(
+                app_data,
+                lambda x: x.split('-')[-2],
+                partial(FaultResUtil.get_combine_faults, k=3),
+                "T3",
+            )
+            combined_app_data5 = add_extra_data(
+                app_data,
+                lambda x: x.split('-')[-2],
+                partial(FaultResUtil.get_combine_faults, k=5),
+                "T5",
+            )
+            # add_extra_data(
+            #     combined_app_data,
+            #     lambda x: x.split('-')[-1],
+            #     FaultResUtil.get_unique_bugs,
+            #     "AU",
+            # )
 
         all_data = all_data.fillna(-1)
         all_data = all_data.astype(int)
@@ -244,13 +247,11 @@ class BugExperiment:
             app_data.to_excel(excel_writer, sheet_name=app_name)
 
         excel_writer.save()
-        excel_writer.close()
 
         PatternUtil.rename_dataframe_by_tag_pattern_dict(all_data, pattern_dict)
         all_data.to_excel(excel_writer_spss)
 
         excel_writer_spss.save()
-        excel_writer_spss.close()
 
     @classmethod
     def export_all_bug_data(cls):
@@ -266,6 +267,6 @@ class BugExperiment:
                     )
 
 
-if __name__ == '__main__':
-    # CoverageExperiment.export_all_coverage_data()
-    BugExperiment.export_all_bug_data()
+# if __name__ == '__main__':
+#     CoverageExperiment.export_all_coverage_data()
+#     BugExperiment.export_all_bug_data()

@@ -33,8 +33,7 @@ class Experiments:
     ]
     EXPERIMENTAL_TARGETS = {
         DataType.Coverage: [
-            (TIME_TARGETS[-1:], APP_TARGETS),
-            (TIME_TARGETS[:-1], APP_TARGETS[:1]),
+            (TIME_TARGETS, APP_TARGETS[:1]),
         ],
         DataType.Bug: [
             (TIME_TARGETS, APP_TARGETS[:1])

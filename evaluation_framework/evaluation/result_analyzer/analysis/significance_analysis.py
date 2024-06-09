@@ -99,7 +99,6 @@ class Significance:
         for key, value in res.items():
             value.to_excel(excel_writer, sheet_name=key)
         excel_writer.save()
-        excel_writer.close()
 
     @staticmethod
     def __combine_sig_data_and_get_counts(file_to_read: str, file_to_write: str, index_filter: Optional[List] = None):
@@ -197,7 +196,6 @@ class Significance:
         res2.to_excel(excel_writer, sheet_name=Significance.IS_SIGNIFICANT_IDENTIFIER)
 
         excel_writer.save()
-        excel_writer.close()
 
         return total
 
@@ -260,7 +258,7 @@ class Significance:
         else:
             temp = pd.read_excel(excel4, index_col=0, dtype=str, sheet_name=None)
             for sheet_name, sheet_data in temp.items():
-                sheet_data.to_excel(combine_to_one_target, sheet_name=f"{raw_data_file_name.split('.')[0]}_{sheet_name}")
+                sheet_data.to_excel(combine_to_one_target, sheet_name=f"{raw_data_file_name.split('.xlsx')[0]}_{sheet_name}")
 
         return total_data
 

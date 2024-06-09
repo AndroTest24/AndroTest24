@@ -244,3 +244,5 @@ empirical_app_list_all_for_combodroid = list(
     Apps.Currencies, Apps.Diary, Apps.K9Mail, Apps.WordPress, Apps.SuntimesWidget, Apps.BetterBatteryStats, Apps.Signal,
     Apps.Firefox, Apps.Tachiyomi, Apps.CoronaWarn, Apps.DuckDuckGo, Apps.NewPipe, Apps.LBRY,
 })
+
+SORTED_TOOL_NAME_LIST = ["Monkey", "Stoat", "APE", "Combodroid", "Humanoid", "QT", "ARES", "DQT"]

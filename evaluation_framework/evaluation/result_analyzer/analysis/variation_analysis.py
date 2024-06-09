@@ -97,7 +97,6 @@ class Variation:
         )
 
         excel_writer.save()
-        excel_writer.close()
 
     @classmethod
     def combine_cv_avg_data(
@@ -122,4 +121,3 @@ class Variation:
         for sheet_name, sheet_data in res.items():
             sheet_data.to_excel(excel_writer, sheet_name=sheet_name)
         excel_writer.save()
-        excel_writer.close()

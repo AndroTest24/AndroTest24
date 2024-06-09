@@ -60,7 +60,6 @@ class Correlation:
         my_logger.hint(my_logger.LogLevel.INFO, "Significance", False, f"Correlation Result:\n{corr_res}")
 
         excel_writer.save()
-        excel_writer.close()
 
     @staticmethod
     def get_correlation_between_time(postfix_pair_list: List[Tuple[str, str]], file_postfix, data_type: DataType):

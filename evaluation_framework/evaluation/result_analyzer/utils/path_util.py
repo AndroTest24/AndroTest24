@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from evaluation.result_analyzer.utils.data_util import DataType
 from runtime_collection import unified_testing_config
@@ -68,8 +69,10 @@ class ExcelDirectoryPathGenerator:
         return target_dir
 
     @classmethod
-    def get_time_data_dir(cls, data_type: DataType):
-        target_dir = os.path.join(cls.EXCEL_ROOT_PATH, "time", data_type.value)
+    def get_time_data_dir(cls, data_type: Optional[DataType]):
+        target_dir = os.path.join(cls.EXCEL_ROOT_PATH, "time")
+        if data_type is not None:
+            target_dir = os.path.join(target_dir, data_type.value)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         return target_dir
@@ -84,6 +87,13 @@ class ExcelDirectoryPathGenerator:
     @classmethod
     def get_pickle_data_dir(cls, data_type: DataType, postfix: str = None):
         target_dir = os.path.join(cls.EXCEL_ROOT_PATH, "pickle", data_type.value, f"abstract{'' if postfix is None else f'_{postfix}'}")
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        return target_dir
+
+    @classmethod
+    def get_case_study_data_dir(cls):
+        target_dir = os.path.join(cls.EXCEL_ROOT_PATH, "case_study")
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
         return target_dir

@@ -14,8 +14,7 @@ from constant import PlatformConstant
 from evaluation.result_analyzer.study_analyzer.study_util import Experiments
 from evaluation.result_analyzer.utils.coverage_util import CoverageTimeUtil, CoverageDataUtil
 from evaluation.result_analyzer.utils.data_util import DataType
-from evaluation.result_analyzer.utils.fault_util import AbstractItem, FaultDomain, LogcatUtil
-from evaluation.result_analyzer.utils.fault_top_level_util import BugAnalyzer
+from evaluation.result_analyzer.utils.fault_util import BugAnalyzer, AbstractItem, FaultDomain, LogcatUtil
 from evaluation.result_analyzer.utils.path_util import ExcelDirectoryPathGenerator
 from evaluation.result_analyzer.utils.pattern_util import PatternUtil
 from runtime_collection.collector_util.util_coverage import CoverageItem
@@ -31,6 +30,13 @@ class CoverageConvergenceTimeItem(NamedTuple):
     percent_100_time: int
     end_time: int
 
+
+PERCENTAGE_TARGETS = list(range(0, 80, 5)) + list(range(80, 95, 2)) + list(range(95, 101, 1))
+
+class CoverageConvergenceTimeFlexibleItem(NamedTuple):
+    final_coverage: float
+    percent_n_time: Dict[int, int]
+    end_time: int
 
 class CoverageConvergenceTime:
     @staticmethod
@@ -69,12 +75,41 @@ class CoverageConvergenceTime:
         )
 
     @staticmethod
+    def analyze_coverage_convergence_time_for_data_list_flexible(
+            coverage_data: List[CoverageItem],
+    ) -> CoverageConvergenceTimeFlexibleItem:
+        final_coverage = coverage_data[-1].detail.rate
+        end_time = coverage_data[-1].time
+        targets = PERCENTAGE_TARGETS
+        percent_n_time = {target:None for target in targets}
+
+        for item in coverage_data:
+            for target in targets:
+                if percent_n_time[target] is None:
+                    if item.detail.rate >= target / 100 * final_coverage:
+                        percent_n_time[target] = item.time
+        return CoverageConvergenceTimeFlexibleItem(
+            final_coverage=final_coverage,
+            percent_n_time=percent_n_time,
+            end_time=end_time,
+        )
+
+    @staticmethod
     def analyze_coverage_convergence_time_for_data_dict(
             coverage_data_dict: Dict[str, List[CoverageItem]],
     ) -> Dict[str, CoverageConvergenceTimeItem]:
         res = {}
         for key, value in coverage_data_dict.items():
             res[key] = CoverageConvergenceTime.analyze_coverage_convergence_time_for_data_list(value)
+        return res
+
+    @staticmethod
+    def analyze_coverage_convergence_time_for_data_dict_flexible(
+            coverage_data_dict: Dict[str, List[CoverageItem]],
+    ) -> Dict[str, CoverageConvergenceTimeFlexibleItem]:
+        res = {}
+        for key, value in coverage_data_dict.items():
+            res[key] = CoverageConvergenceTime.analyze_coverage_convergence_time_for_data_list_flexible(value)
         return res
 
     @staticmethod
@@ -99,7 +134,8 @@ class CoverageConvergenceTime:
                             data: Dict[str, List[CoverageItem]] = np.load(file_path, allow_pickle=True).item()
                             data = CoverageTimeUtil.normalize_time_for_data_dict(data, testing_time)
                             data = CoverageDataUtil.extend_coverage_data_dict_with_standard_time_series(data, testing_time, 10, False)
-                            current_result_dict = CoverageConvergenceTime.analyze_coverage_convergence_time_for_data_dict(data)
+                            # current_result_dict = CoverageConvergenceTime.analyze_coverage_convergence_time_for_data_dict(data)
+                            current_result_dict = CoverageConvergenceTime.analyze_coverage_convergence_time_for_data_dict_flexible(data)
 
                             res_index = f"{get_app_name_by_package_name(package)}"
                             res.loc[res_index, "tag"] = tag
@@ -108,10 +144,12 @@ class CoverageConvergenceTime:
                             for coverage_key in target_keys:
                                 convergence_value = current_result_dict[coverage_key]
                                 res_column_prefix = coverage_key[:1]
-                                res.loc[res_index, f"{res_column_prefix}-90%"] = str(convergence_value.percent_90_time)
-                                res.loc[res_index, f"{res_column_prefix}-95%"] = str(convergence_value.percent_95_time)
-                                res.loc[res_index, f"{res_column_prefix}-98%"] = str(convergence_value.percent_98_time)
-                                res.loc[res_index, f"{res_column_prefix}-100%"] = str(convergence_value.percent_100_time)
+                                for target in convergence_value.percent_n_time.keys():
+                                    res.loc[res_index, f"{res_column_prefix}-{target}%"] = str(convergence_value.percent_n_time[target])
+                                # res.loc[res_index, f"{res_column_prefix}-90%"] = str(convergence_value.percent_90_time)
+                                # res.loc[res_index, f"{res_column_prefix}-95%"] = str(convergence_value.percent_95_time)
+                                # res.loc[res_index, f"{res_column_prefix}-98%"] = str(convergence_value.percent_98_time)
+                                # res.loc[res_index, f"{res_column_prefix}-100%"] = str(convergence_value.percent_100_time)
                                 res.loc[res_index, f"{res_column_prefix}-cov"] = convergence_value.final_coverage * 100
                             break
 
@@ -154,7 +192,6 @@ def present_and_export_coverage_convergence_result(target_app_dict: Dict[str, Li
         data.to_excel(excel_writer, sheet_name=f"{target}_{postfix}")
 
     excel_writer.save()
-    excel_writer.close()
 
 
 class FaultConvergenceTime:
@@ -204,11 +241,11 @@ class FaultConvergenceTime:
 
     @classmethod
     def calculate_fault_discover_time(cls, item_name: str, min_list: List[Tuple[float, str]]):
-        target_per_list = [90, 95, 98, 100]
+        target_per_list = PERCENTAGE_TARGETS
         columns = []
         for fault_domain in list(FaultDomain):
-            columns.append(f"{fault_domain.value}_n")
-            columns += [f"{fault_domain.value}_{i}%" for i in target_per_list]
+            columns.append(f"{fault_domain.value}-n")
+            columns += [f"{fault_domain.value}-{i}%" for i in target_per_list]
         res = pd.DataFrame(columns=columns)
         for column in res.columns:
             if column.endswith("%"):
@@ -232,13 +269,16 @@ class FaultConvergenceTime:
 
         for domain, time_list in domain_temp.items():
             time_list = sorted(time_list)
-            res.loc[item_name, f"{domain.value}_n"] = len(time_list)
+            res.loc[item_name, f"{domain.value}-n"] = len(time_list)
             for i in target_per_list:
                 if len(time_list) == 0:
-                    res.loc[item_name, f"{domain.value}_{i}%"] = 0
+                    res.loc[item_name, f"{domain.value}-{i}%"] = 0
                 else:
-                    pos = math.ceil(len(time_list) * i / 100) - 1
-                    res.loc[item_name, f"{domain.value}_{i}%"] = time_list[pos] / 3600
+                    pos = math.floor(len(time_list) * i / 100) - 1
+                    if pos < 0:
+                        res.loc[item_name, f"{domain.value}-{i}%"] = 0
+                    else:
+                        res.loc[item_name, f"{domain.value}-{i}%"] = time_list[pos] / 3600
         return res
 
 
@@ -282,4 +322,3 @@ def present_fault_convergence_result(postfix: str, target_apps):
         res.to_excel(excel_writer, sheet_name=f"{pattern}_{postfix}")
 
     excel_writer.save()
-    excel_writer.close()

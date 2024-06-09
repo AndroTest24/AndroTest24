@@ -46,3 +46,5 @@ Some raw exported data has been provided under `/evaluation_framework/evaluation
 3. randomness_analyzer.py
 4. convergence_analyzer.py
 
+Note: A test shell (`/evaluation_framework/test.sh`) which rely on the `python` cmd is also provided for a quick test. Run it inside the Python environment.
+

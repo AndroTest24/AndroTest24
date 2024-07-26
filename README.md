@@ -5,12 +5,68 @@ A pre-released version of our study data and evaluation framework, as well as th
 <br/>
 
 ## Part-1  AndroidTest24 App Benchamrk
-As the file is large for GitHub, please download it from [GoogleDrive](https://drive.google.com/drive/folders/1Oi2FtP13uIldCiGaeHJ01Qj0YX-Py_wj?usp=sharing).
+As the file is large for GitHub, please download it from [GoogleDrive](https://drive.google.com/drive/folders/1Oi2FtP13uIldCiGaeHJ01Qj0YX-Py_wj?usp=sharing).<br />The app version information is also provided by file names with the app files.
 
 <br/>
 
 ## Part-2 Study Data (/study_data)
 The study data of our study.<br />They are organized according to our RQs and have been renamed for better understandability.
+
+### Selected Testing Approaches
+#### Random-Based
+Monkey
+
+- Tool: https://developer.android.com/studio/test/other-testing-tools/monkey
+#### Model-Based
+Stoat
+
+- Paper: [ESEC/FSE’17] Guided, stochastic model-based GUI testing of Android apps
+- Tool: https://github.com/tingsu/Stoat
+
+APE
+
+- Paper: [ICSE’19] Practical GUI Testing of Android Applications via Model Abstraction and Refinement
+- Tool: https://github.com/tianxiaogu/ape
+#### Systematic
+ComboDroid
+
+- Paper: [ICSE’20] ComboDroid: Generating High-Quality Test Inputs for Android Apps via Use Case Combinations
+- Tool: https://github.com/skull591/ComboDroid-Artifact
+#### Machine-Learning-Based
+**Supervised-Learning-Based**<br />Humanoid
+
+- Paper: [ASE’19] Humanoid: A Deep Learning-based Approach to Automated Black-box Android App Testing
+- Tool: https://github.com/yzygitzh/Humanoid
+
+**Tabular-RL-Based**<br />Q-testing
+
+- Paper: [ISSTA’20] Reinforcement Learning Based Curiosity-Driven Testing of Android Applications
+- Tool: https://github.com/anlalalu/Q-testing
+##### Deep-RL-Based
+ARES
+
+- Paper: [TOSEM’22] Deep Reinforcement Learning for Black-box Testing of Android Apps
+- Tool: https://github.com/H2SO4T/ARES
+
+DQT
+
+- Paper: [ICSE’24] Deeply Reinforcing Android GUI Testing with Deep Reinforcement Learning
+- Tool: https://github.com/Yuanhong-Lan/DQT
+
+### Emulator Settings
+**Basic Settings**
+
+- Hardware: Google Pixel 2
+- Resolution: 1080*1920
+- Android Version: Android 9.0 (API Level 28)
+- Google Sevice: Google APIs
+
+**Storage**
+
+- RAM: 4GB
+- VM Heap: 2GB
+- Internal Storage: 8GB
+- SD Card: 1GB
 
 <br/>
 

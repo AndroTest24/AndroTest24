@@ -13,11 +13,11 @@ As the file is large for GitHub, please download it from [GoogleDrive](https://d
 The study data of our study.<br />They are organized according to our RQs and have been renamed for better understandability.
 
 ### Selected Testing Approaches
-#### Random-Based
+#### 1. Random-Based
 Monkey
 
 - Tool: https://developer.android.com/studio/test/other-testing-tools/monkey
-#### Model-Based
+#### 2. Model-Based
 Stoat
 
 - Paper: [ESEC/FSE’17] Guided, stochastic model-based GUI testing of Android apps
@@ -27,23 +27,23 @@ APE
 
 - Paper: [ICSE’19] Practical GUI Testing of Android Applications via Model Abstraction and Refinement
 - Tool: https://github.com/tianxiaogu/ape
-#### Systematic
+#### 3. Systematic
 ComboDroid
 
 - Paper: [ICSE’20] ComboDroid: Generating High-Quality Test Inputs for Android Apps via Use Case Combinations
 - Tool: https://github.com/skull591/ComboDroid-Artifact
-#### Machine-Learning-Based
-**Supervised-Learning-Based**<br />Humanoid
+#### 4. Machine-Learning-Based
+**4.1 Supervised-Learning-Based**<br />Humanoid
 
 - Paper: [ASE’19] Humanoid: A Deep Learning-based Approach to Automated Black-box Android App Testing
 - Tool: https://github.com/yzygitzh/Humanoid
 
-**Tabular-RL-Based**<br />Q-testing
+**4.2 Tabular-RL-Based**<br />Q-testing
 
 - Paper: [ISSTA’20] Reinforcement Learning Based Curiosity-Driven Testing of Android Applications
 - Tool: https://github.com/anlalalu/Q-testing
-##### Deep-RL-Based
-ARES
+
+**4.3 Deep-RL-Based**<br />ARES
 
 - Paper: [TOSEM’22] Deep Reinforcement Learning for Black-box Testing of Android Apps
 - Tool: https://github.com/H2SO4T/ARES

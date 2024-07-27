@@ -1,6 +1,6 @@
 # Statistical Android Metrics Evaluation (pre-released)
 ## Overview
-A pre-released version of our study data and evaluation framework, as well as the AndroTest24 benchmark apps.
+A pre-released version of ① the AndroTest24 app benchmark, ② our study data with important infos, and ③ the proposed evaluation framework.
 
 <br/>
 
@@ -12,11 +12,12 @@ As the file is large for GitHub, please download it from [GoogleDrive](https://d
 ## Part-2 Study Data (/study_data)
 The study data of our study.<br />They are organized according to our RQs and have been renamed for better understandability.
 
-### Selected Testing Approaches
+### Selected Testing Approaches for the Study
 #### 1. Random-Based
 Monkey
 
 - Tool: https://developer.android.com/studio/test/other-testing-tools/monkey
+- Parameters: `--ignore-crashes --ignore-timeouts --ignore-security-exceptions -v --throttle 200`
 #### 2. Model-Based
 Stoat
 
